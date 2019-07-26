@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\PagePiece;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -10,7 +12,6 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::post('/events/page_piece/{id}/{labeledBy}' , "Controller@addEventOfPagePiece");
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/to-label/{author}', "Controller@showPagePieceToBeLabeled");
