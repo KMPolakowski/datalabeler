@@ -27,7 +27,17 @@ class Controller extends BaseController
         try {
             $pagePiece = PagePiece::findOrFail($pagePieceId);
 
-            if (empty(implode("", $request->get("people")))) {
+            if (isset($pagePiece->labeled_by)) {
+                $result = "wasted";
+                $msg = "sb else already labeled in the meantime";
+
+                return \redirect("/to-label/" . $labeledBy)->with($result, $msg);
+            }
+
+            if (empty(implode(
+                    "",
+                    $request->get("people")
+                ))) {
                 $pagePiece->labeled_by = $labeledBy;
                 $pagePiece->saveOrFail();
 
@@ -48,14 +58,22 @@ class Controller extends BaseController
             }
 
             $location = new Location;
-            $location->name = $request->get("location");
-            $location->saveOrFail();
-
             $event = new Event;
 
-            $event->happening_at = $request->get("happening_at");
-            $event->published_at = $request->get("published_at");
-            $event->location_id = $location->id;
+            if ($request->get("location") !== "n") {
+                $location->name = $request->get("location");
+                $location->saveOrFail();
+                $event->location_id = $location->id;
+            }
+
+            if ($request->get("happening_at") !== "n") {
+                $event->happening_at = $request->get("happening_at");
+            }
+
+            if ($request->get("published_at")) {
+                $event->published_at = $request->get("published_at");
+            }
+
             $event->type = $request->get("type");
             $event->saveOrFail();
 
@@ -107,7 +125,7 @@ HAVING (
         1 = 1 
 			AND `fm1`.`id` = `fm0`.`id`
             AND `pp1`.`labeled_by` IS NOT NULL
-    ) <= 200
+    ) <= 20
 LIMIT 1;
 SQL;
 
